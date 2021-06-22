@@ -137,14 +137,15 @@ echo $COMMAND
 $COMMAND
 RC=$?
 
-if [ RC -eq 0 ]; then
+if [ $RC -eq 0 ]; then
     outputs="aws cloudformation describe-stacks \
         --stack-name ${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${STACK_NAME} \
-        --output text \
+        --output table \
         --query Stacks[].Outputs[] \
         --region $REGION"
 
     echo "$outputs"
+    $outputs
 fi
 
 exit 0
