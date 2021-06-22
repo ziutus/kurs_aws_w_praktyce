@@ -1,6 +1,19 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Simple website S3 bucket
 
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Project information
+        Parameters:
+          - Project
+          - Component 
+      - Label:
+          default: Deployment information
+          Parameters:
+            - Stage
+
 Parameters:
   Project:
     Description: Project name
