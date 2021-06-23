@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Template for log bucket
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Project information
+        Parameters:
+          - Project
+          - Component 
+      - Label:
+          default: Deployment information
+          Parameters:
+            - Stage
+
+Parameters:
+  Project:
+    Description: Project name
+    Type: String
+    AllowedPattern: ^[a-z][a-zA-Z0-9-]{3,20}$
+  Component:
+    Description: Name of the component
+    Type: String
+    AllowedPattern: ^[a-z][a-zA-Z0-9-]{2,20}$
+  Stage:
+    Description: Name of the component
+    Type: String
+    AllowedPattern: ^[a-z][a-zA-Z0-9-]{2,20}$
+
+Resources: 
+  S3LogBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties: 
+      BucketName:  !Sub ${Project}-${Stage}-${Component}-log-bucket
+      AccessControl:  LogDeliveryWrite
+
+  S3LogBucketNameParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub /${Project}/${Stage}/${Component}/log-bucket/name
+      Type: String
+      Value: !Ref S3LogBucket
+      Description: !Sub Stores ${Project}-${Stage}-${Component}-log-bucket
+      Tier: Standard
+      Tags:
+          Name: !Sub ${Project}-${Stage}-${Component}-log-bucket-name
+
+
+Outputs:
+  S3LogBucket:
+    Value: !Ref S3LogBucket
+    Description: Backet Name
+      

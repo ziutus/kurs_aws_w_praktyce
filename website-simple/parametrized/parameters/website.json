@@ -1,0 +1,18 @@
+[
+   {
+        "ParameterKey": "Project",
+        "ParameterValue": "website-simple"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "parametrized"
+    },
+    {
+        "ParameterKey": "Stage",
+        "ParameterValue": "dev"
+    },
+    {
+        "ParameterKey": "LogBucketName",
+        "ParameterValue": "/website-simple/dev/parametrized/log-bucket/name"
+    }
+]

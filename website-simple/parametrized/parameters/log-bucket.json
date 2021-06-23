@@ -1,0 +1,14 @@
+[
+   {
+        "ParameterKey": "Project",
+        "ParameterValue": "website-simple"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "parametrized"
+    },
+    {
+        "ParameterKey": "Stage",
+        "ParameterValue": "dev"
+    }
+]
