@@ -63,14 +63,14 @@ Conditions:
 
 Outputs:
 OEF
+  fi
 
-
- if [ -z $STAGE ]; then
-  FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/$STACK_NAME.json"
-  if [ -f $FILE_NAME ]; then
-        echo "The file $FILE_NAME exist, not creating new one"
-  else
-  cat << EOF > $FILE_NAME
+  if [ -z $STAGE ]; then
+    FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/$STACK_NAME.json"
+    if [ -f $FILE_NAME ]; then
+      echo "The file $FILE_NAME exist, not creating new one"
+    else
+      cat << EOF > $FILE_NAME
 [
     {
         "ParameterKey": "Project",
@@ -83,13 +83,12 @@ OEF
 ]
 EOF
     fi
-
+  else 
+    FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/${STACK_NAME}-${STAGE}.json"
+    if [ -f $FILE_NAME ]; then
+      echo "The file $FILE_NAME exist, not creating new one"
     else 
-      FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/${STACK_NAME}-${STAGE}.json"
-          if [ -f $FILE_NAME ]; then
-            echo "The file $FILE_NAME exist, not creating new one"
-          else 
-            cat << EOF > $FILE_NAME
+      cat << EOF > $FILE_NAME
 [
     {
         "ParameterKey": "Project",
@@ -105,9 +104,8 @@ EOF
     }
 ]
 EOF
-        fi
     fi
-
+  fi
 fi
 
 exit 0;
