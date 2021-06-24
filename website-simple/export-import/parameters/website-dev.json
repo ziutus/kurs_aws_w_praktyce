@@ -1,0 +1,14 @@
+[
+    {
+        "ParameterKey": "Project",
+        "ParameterValue": "website-simple"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "export-import"
+    },
+    {
+        "ParameterKey": "Stage",
+        "ParameterValue": "dev"
+    }
+]
