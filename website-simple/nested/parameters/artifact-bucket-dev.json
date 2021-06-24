@@ -1,0 +1,18 @@
+[
+    {
+        "ParameterKey": "Project",
+        "ParameterValue": "website-simple"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "nested"
+    },
+    {
+        "ParameterKey": "Stage",
+        "ParameterValue": "dev"
+    },
+    {
+        "ParameterKey": "Versioning",
+        "ParameterValue": "true"
+    }
+]
