@@ -5,11 +5,6 @@ set -u
 VERSION="1.2"
 VERSION_CODE_NAME="simple_site_import_export"
 
-DIRNAME=$(dirname $0)
-if [[ "$DIRNAME" == "." ]]; then
-    DIRNAME=$(pwd)
-fi
-
 REGION=$(echo $AWS_REGION)
 
 function show_variables() {
@@ -43,7 +38,8 @@ EOF
 STACK_NAME=""
 STAGE=""
 PROJECT_NAME=""
-PROJECT_NAME=""
+COMPONENT_NAME=""
+DIRNAME=""
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -59,12 +55,18 @@ done;
 
 if  [ -z $PROJECT_NAME ] && [ -z $COMPONENT_NAME ]; then
     echo "guessing project name and component from path"
+    DIRNAME=$(dirname $0)
+    if [[ "$DIRNAME" == "." ]]; then
+        DIRNAME=$(pwd)
+    fi
+
     COMPONENT_PATH=$(dirname $DIRNAME)
     COMPONENT_NAME=$(basename $COMPONENT_PATH)
     PROJECT_PATH=$(dirname $COMPONENT_PATH)
     PROJECT_NAME=$(basename $PROJECT_PATH)
+    # echo " -- dirname: $DIRNAME"
     echo " -- project name: $PROJECT_NAME"
-    echo " -- compomnent name: $COMPONENT_PATH"
+    echo " -- compomnent name: $COMPONENT_NAME"
 else 
     echo " setup project path and component path from command line options"
     PROJECT_PATH="./$PROJECT_NAME"
