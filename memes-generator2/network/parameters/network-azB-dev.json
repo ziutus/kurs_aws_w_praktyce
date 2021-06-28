@@ -1,0 +1,34 @@
+[
+    {
+        "ParameterKey": "Project",
+        "ParameterValue": "memes-generator2"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "network"
+    },
+    {
+        "ParameterKey": "Stage",
+        "ParameterValue": "dev"
+    },    
+    {
+        "ParameterKey": "VpcId",
+        "ParameterValue": "/memes-generator2/dev/network/vpc/vpc-id"
+    },
+    {
+        "ParameterKey": "PublicRouteTableId",
+        "ParameterValue": "/memes-generator2/dev/network/public-route-table/rt-id"
+    },
+    {
+        "ParameterKey": "PublicSubnetBCidr",
+        "ParameterValue": "10.0.96.0/20"
+    },
+    {
+        "ParameterKey": "PrivateSubnetBCidr",
+        "ParameterValue": "10.0.64.0/19"
+    },
+    {
+        "ParameterKey": "DataSubnetBCidr",
+        "ParameterValue": "10.0.112.0/21"
+    }
+]

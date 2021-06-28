@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Base Network configuration for second Availablity Zone
+
+Parameters:
+  Project:
+    Description: Project name
+    Type: String
+    AllowedPattern: ^[a-z][a-zA-Z0-9-]{3,20}$
+  Component:
+    Description: Name of the component
+    Type: String
+    AllowedPattern: ^[a-z][a-zA-Z0-9-]{2,15}$
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedPattern: ^[a-z][a-zA-Z0-9-]{2,15}$
+
+  # Data taken from Parameters Storage
+  VpcId:
+    Description: Reference of the VpcId from the SSM
+    Type: AWS::SSM::Parameter::Value<String>
+  PublicSubnetBCidr:
+    Description: Public Subnet B CIDR
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    Type: String
+  PrivateSubnetBCidr:
+    Description: Subnet B Cidr
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    Type: String
+  DataSubnetBCidr:
+    Description: Data Subnet B CIDR
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    Type: String
+  PublicRouteTableId:
+    Description: Reference of the VpcId from the SSM
+    Type: AWS::SSM::Parameter::Value<String>
+  
+Resources:
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 0 , !GetAZs '' ]
+      VpcId: !Ref VpcId
+      CidrBlock: !Ref PublicSubnetBCidr
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${Project}-${Stage}-${Component}-public-subnet-b
+
+  PublicSubnetBRouteTableAssociation:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        RouteTableId: !Ref PublicRouteTableId
+        SubnetId: !Ref PublicSubnetB
+
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 0 , !GetAZs '' ]
+      VpcId: !Ref VpcId
+      CidrBlock: !Ref PrivateSubnetBCidr
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${Project}-${Stage}-${Component}-private-subnet-b
+
+  PrivateRouteTableB:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub ${Project}-${Stage}-${Component}-private-b-route-name
+
+  PrivateRouteTableBssociationB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableB
+      SubnetId: !Ref PrivateSubnetB
+
+  DataSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [0, !GetAZs '' ]
+      VpcId: !Ref VpcId
+      CidrBlock: !Ref DataSubnetBCidr
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${Project}-${Stage}-${Component}-data-subnet-b
+
+  DataRouteTableB:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub ${Project}-${Stage}-${Component}-data-route-table-b
+
+  DataRouteTableBssociationB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref DataRouteTableB
+      SubnetId: !Ref DataSubnetB
+
+# Outputs:
