@@ -103,7 +103,7 @@ Resources:
           ToPort: !Ref DatabasePort
           SourceSecurityGroupId: !Ref ApplicationSecurityGroup
       Tags:
-        - Key: name
+        - Key: Name
           Value: !Sub ${Project}-${Stage}-${Component}-database-sg
       VpcId: !Ref VpcId
 
