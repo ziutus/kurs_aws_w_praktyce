@@ -47,6 +47,17 @@ Resources:
         - Key: Name
           Value: !Sub ${Project}-${Stage}-${Component}-public-subnet-b
 
+  PublicSubnetBIdParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Description: !Sub Stores ${Project}-${Stage}-${Component}- PublicSubnetB Id
+      Tier: Standard
+      Name: !Sub /${Project}/${Stage}/${Component}/public-subnet-b/subnet-id
+      Value: !Ref PublicSubnetB
+      Tags:
+        Name: !Sub ${Project}-${Stage}-${Component}-public-subnet-b-id
+
   PublicSubnetBRouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
       Properties:
@@ -71,6 +82,17 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${Project}-${Stage}-${Component}-private-b-route-name
+
+  PrivateRouteTableBIdParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Description: !Sub Stores ${Project}-${Stage}-${Component} Private Route Table B ID
+      Tier: Standard
+      Name: !Sub /${Project}/${Stage}/${Component}/private-route-table-b/rt-id
+      Value: !Ref PrivateRouteTableB
+      Tags:
+        Name: !Sub ${Project}-${Stage}-${Component}-private-route-table-b-id
 
   PrivateRouteTableBssociationB:
     Type: AWS::EC2::SubnetRouteTableAssociation

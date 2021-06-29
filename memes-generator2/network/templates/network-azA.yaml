@@ -47,6 +47,17 @@ Resources:
         - Key: Name
           Value: !Sub ${Project}-${Stage}-${Component}-public-subnet-a
 
+  PublicSubnetAParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Description: !Sub Stores ${Project}-${Stage}-${Component} Public Subnet in AZ A
+      Tier: Standard
+      Name: !Sub /${Project}/${Stage}/${Component}/public-subnet-a/subnet-id
+      Value: !Ref PublicSubnetA
+      Tags:
+        Name: !Sub ${Project}-${Stage}-${Component}-public-subnet-a-subnet-id
+
   PublicSubnetARouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
       Properties:
@@ -71,6 +82,17 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${Project}-${Stage}-${Component}-private-a-route-name
+
+  PrivateRouteTableAIdParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Description: !Sub Stores ${Project}-${Stage}-${Component} Private Route Table A ID
+      Tier: Standard
+      Name: !Sub /${Project}/${Stage}/${Component}/private-route-table-a/rt-id
+      Value: !Ref PrivateRouteTableA
+      Tags:
+        Name: !Sub ${Project}-${Stage}-${Component}-private-route-table-a-id
 
   PrivateRouteTableAssociationA:
     Type: AWS::EC2::SubnetRouteTableAssociation
