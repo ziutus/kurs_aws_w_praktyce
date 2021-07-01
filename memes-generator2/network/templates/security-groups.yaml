@@ -50,6 +50,17 @@ Resources:
        - Key: Name
          Value: !Sub ${Project}-${Stage}-${Component}-jumphost-sg
 
+  JumpHostSecurityGroupParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String 
+      Description: !Sub Stores ${Project}-${Stage}-${Component} Jump host security Group
+      Name: !Sub /${Project}/${Stage}/${Component}/jumphost-sg/sg-id
+      Tier: Standard
+      Value: !Ref JumpHostSecurityGroup
+      Tags:
+        Name: !Sub ${Project}-${Stage}-${Component}-vpc-id
+
   AlbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
