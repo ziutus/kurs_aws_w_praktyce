@@ -6,6 +6,7 @@ PROJECT_NAME=""
 COMPONENT_NAME=""
 STACK_NAME=""
 STAGE=""
+PARAMS=""
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -14,6 +15,7 @@ while [ $# -gt 0 ]; do
         -c|--component) shift; COMPONENT_NAME=$1; shift;;
         -s|--stage) shift; STAGE=$1; shift;;
         -S|--stack) shift; STACK_NAME=$1; shift;;
+        -P|--params) shift; PARAMS=$1; shift;;
 
         *) echo "Wrong option $1"; exit 1;
     esac
@@ -66,7 +68,12 @@ OEF
   fi
 
   if [ -z $STAGE ]; then
-    FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/$STACK_NAME.json"
+    if [ -z $PARAMS ]; then
+      FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/$STACK_NAME.json"
+    else 
+      FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/$STACK_NAME-${PARAMS}.json"
+    fi
+    
     if [ -f $FILE_NAME ]; then
       echo "The file $FILE_NAME exist, not creating new one"
     else
@@ -84,7 +91,13 @@ OEF
 EOF
     fi
   else 
-    FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/${STACK_NAME}-${STAGE}.json"
+    if [ -z $PARAMS ]; then
+      FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/$STACK_NAME-${STAGE}.json"
+    else 
+      FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/$STACK_NAME-${PARAMS}-${STAGE}.json"
+    fi
+    
+
     if [ -f $FILE_NAME ]; then
       echo "The file $FILE_NAME exist, not creating new one"
     else 
