@@ -79,6 +79,38 @@ Resources:
       TargetId: !Ref DbInstance
       TargetType: AWS::RDS::DBInstance
 
+  DbAppCredentials:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub Username for ${Project}-${Stage}-${Component}-db
+      Name: !Sub ${Project}/${Stage}/${Component}/rds/app-user-secret
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "appuser"}'
+        GenerateStringKey: password
+        PasswordLength: 15
+        ExcludePunctuation: true
+        ExcludeCharacters: '"@/\'
+
+  DbAppCredentialsArnParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Description: !Sub Stores ${Project}-${Stage}-${Component} App CredentialsArn
+      Tier: Standard
+      Name: !Sub /${Project}/${Stage}/${Component}/database/app-credentials-arn
+      Value: !Ref DbAppCredentials
+      Tags:
+        Name: !Sub ${Project}-${Stage}-${Component}-database-app-credentials-arn
+
+  DbSecretAppAttachment:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId: !Ref DbAppCredentials
+      TargetId: !Ref DbInstance
+      TargetType: AWS::RDS::DBInstance
+
+
+
 # Mappings: 
 
 # Conditions: 
