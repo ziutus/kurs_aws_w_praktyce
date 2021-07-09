@@ -1,9 +1,10 @@
 #!/bin/bash
 set -e
 set -u 
+# set -x
 
-VERSION="1.2"
-VERSION_CODE_NAME="simple_site_import_export"
+VERSION="1.3"
+VERSION_CODE_NAME="multi param version"
 
 REGION=$(echo $AWS_REGION)
 
@@ -27,6 +28,19 @@ function usage() {
 cat << EOF
 usage: $0 
 
+        -h|--help
+        -s|--stage STAGE_NAME
+        -S|--stack STACK_NAME
+        -p|--project PROJECT_NAME
+        -c|--component COMPONENT_NAME
+        -P|--params PARAMS_NAME
+        --list-params
+        --list-stacks
+        --list-components
+        --list-projects
+        --exec
+        --preview
+
 Link to AWS documentation: https://awscli.amazonaws.com/v2/documentation/api/latest/reference/cloudformation/deploy/index.html
 EOF
 
@@ -34,12 +48,45 @@ EOF
     exit 1
 }
 
+function listProjects() {
+    echo "Possible projects in: >$DIR_NAME<"
+    find $DIR_NAME -mindepth 1 -maxdepth 1 -type d | egrep -v  ".git" 
+    exit 1
+}
+
+function listComponents() {
+    echo "Possible components in >$PROJECT_PATH<:"
+    find $PROJECT_PATH -mindepth 1 -maxdepth 1 -type d | egrep -v  ".git" | sed "s/\/$PROJECT_NAME\///" | sed "s/\.//g"
+    exit 1
+}
+
+function listStacks() {
+    echo "Possible stacks in >$COMPONENT_PATH/templates<:"
+    find $COMPONENT_PATH/templates -mindepth 1 -maxdepth 1 -type f
+    exit 1
+
+}
+
+function listParamFiles() {
+    echo "Possible Parameters files in $COMPONENT_PATH/parameters/"
+    find $COMPONENT_PATH/parameters/ -ls
+    echo "Please remember that you don't need to put STACK part in --params parameters"
+    exit 1
+}
+
+
 
 STACK_NAME=""
 STAGE=""
 PROJECT_NAME=""
 COMPONENT_NAME=""
-DIRNAME=""
+DIR_NAME=""
+PARAMS=""
+LIST_PROJECTS=0
+LIST_PARAMS=0
+LIST_COMPONENTS=0
+LIST_STACKS=0
+EXEC=0
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -48,23 +95,35 @@ while [ $# -gt 0 ]; do
         -S|--stack) shift; STACK_NAME=$1; shift;;
         -p|--project) shift; PROJECT_NAME=$1; shift;;
         -c|--component) shift; COMPONENT_NAME=$1; shift;;
-
+        -P|--params) shift; PARAMS=$1; shift;;
+        --list-params) shift; LIST_PARAMS=1;;
+        --list-components) shift; LIST_COMPONENTS=1;;
+        --list-stacks) shift; LIST_STACKS=1;;
+        --list-projects) shift; LIST_PROJECTS=1;;
+        --exec) shift; EXEC=1;;
+        --preview) shift; EXEC=0;;
         *) echo "Wrong option $1"; exit 1;
     esac
 done;
 
-if  [ -z $PROJECT_NAME ] && [ -z $COMPONENT_NAME ]; then
-    echo "guessing project name and component from path"
-    DIRNAME=$(dirname $0)
-    if [[ "$DIRNAME" == "." ]]; then
+
+if  [ -z $PROJECT_NAME ]; then
+    echo "guessing project name from path"
+    DIR_NAME=$(dirname $0)
+    if [[ "$DIR_NAME" == "." ]]; then
         DIRNAME=$(pwd)
     fi
 
-    COMPONENT_PATH=$(dirname $DIRNAME)
-    COMPONENT_NAME=$(basename $COMPONENT_PATH)
-    PROJECT_PATH=$(dirname $COMPONENT_PATH)
-    PROJECT_NAME=$(basename $PROJECT_PATH)
-    # echo " -- dirname: $DIRNAME"
+    [ $LIST_PROJECTS -eq 1 ] && listProjects
+
+    if [ -z $COMPONENT_NAME ]; then 
+        COMPONENT_PATH=$(dirname $DIR_NAME)
+        COMPONENT_NAME=$(basename $COMPONENT_PATH)
+        PROJECT_PATH=$(dirname $COMPONENT_PATH)
+        PROJECT_NAME=$(basename $PROJECT_PATH)
+    fi
+
+    # echo " -- dirname: $DIR_NAME"
     echo " -- project name: $PROJECT_NAME"
     echo " -- compomnent name: $COMPONENT_NAME"
 else 
@@ -77,6 +136,11 @@ else
         exit 1
     fi
     echo " [OK]"
+
+    if [ -z $COMPONENT_NAME ] || [ $LIST_COMPONENTS -eq 1 ]; then 
+        listComponents
+    fi     
+
 
     COMPONENT_PATH="./$PROJECT_NAME/$COMPONENT_NAME"
     echo -n " -- component path: $COMPONENT_PATH"
@@ -97,10 +161,14 @@ if [ -z $STAGE ]; then
     usage
 fi
 
+[ $LIST_STACKS -eq 1 ] && listStacks
+
 if [ -z $STACK_NAME ]; then 
     echo "A parameter --stack is missing. "
-    usage
+    listStacks
 fi
+
+[ $LIST_PARAMS -eq 1 ] && listParamFiles
 
 echo -n "Checking if template file exist in $COMPONENT_PATH/templates/"
 if [ -f "$COMPONENT_PATH/templates/${STACK_NAME}-${STAGE}.yaml" ]; then
@@ -115,18 +183,32 @@ else
     echo ' [OK]'
 fi
 
-echo -n "Checking if parameter file exist in $COMPONENT_PATH/parameters/"
-if [ -f "$COMPONENT_PATH/parameters/${STACK_NAME}-${STAGE}.json" ]; then
-    PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${STAGE}.json"
-    echo "[OK]"
-else
-    PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}.json"
-    if [ ! -f $PARAM_FILE ]; then 
-        echo "Can't file parameters file >$PARAM_FILE<, is this correct stack?"
-        exit 2
+echo "params >$PARAMS< "
+if [ -z $PARAMS ]; then
+    echo -n "Checking if default parameter file exist in $COMPONENT_PATH/parameters/"
+    if [ -f "$COMPONENT_PATH/parameters/${STACK_NAME}-${STAGE}.json" ]; then
+        PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${STAGE}.json"
+    else
+        PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}.json"
+        if [ ! -f $PARAM_FILE ]; then 
+            echo "Can't file parameters file >$PARAM_FILE<, is this correct stack?"
+            exit 2
+        fi
     fi
-    echo " [OK]"
+else 
+    echo -n "Checking if special parameter file exist in $COMPONENT_PATH/parameters/"
+    if [ -f "$COMPONENT_PATH/parameters/${STACK_NAME}-${PARAMS}-${STAGE}.json" ]; then
+        PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${PARAMS}-${STAGE}.json"
+    else
+        PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${PARAMS}.json"
+        if [ ! -f $PARAM_FILE ]; then 
+            echo "Can't file parameters file >$PARAM_FILE<, is this correct stack?"
+            exit 2
+        fi
+    fi
+
 fi
+echo " [OK]"
 
 echo "Checking if parameters in PARAM files are the same as in command line to aviod problems after simple copy of files:"
 echo -n "  -- Checking PROJECT NAME"
@@ -162,29 +244,48 @@ fi
 echo "All prechecks status [OK]";
 echo ""
 
+if [ -z $PARAMS ]; then
+    STACK_NAME="${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${STACK_NAME}"
+else 
+    STACK_NAME="${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${PARAMS}-${STACK_NAME}"
+fi
+
 COMMAND="aws cloudformation deploy  \
     --template-file $TEMPLATE_FILE \
-    --stack-name ${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${STACK_NAME} \
+    --stack-name $STACK_NAME \
+    --capabilities CAPABILITY_NAMED_IAM \
     --no-fail-on-empty-changeset \
     --parameter-overrides file://$PARAM_FILE \
     --region $REGION \
     --tags Project=$PROJECT_NAME Stage=$STAGE Component=$COMPONENT_NAME"
-    # --capabilities CAPABILITY_NAMED_IAM \
-
+ 
 echo $COMMAND
 
+if [ $EXEC -eq 0 ]; then
+    echo "it is preview, no action taken..."
+    exit 0
+fi
+
+
+set +e
 $COMMAND
 RC=$?
 
 if [ $RC -eq 0 ]; then
     outputs="aws cloudformation describe-stacks \
-        --stack-name ${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${STACK_NAME} \
+        --stack-name $STACK_NAME \
         --output table \
         --query Stacks[].Outputs[] \
         --region $REGION"
 
     echo "$outputs"
     $outputs
+else
+    echo ""
+    echo "if you want to remove problematic stack call below command"
+    echo "aws cloudformation delete-stack --stack $STACK_NAME"    
 fi
+
+
 
 exit 0
