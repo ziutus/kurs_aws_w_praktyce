@@ -111,6 +111,17 @@ Resources:
         - Key: Name
           Value: !Sub ${Project}-${Stage}-${Component}-data-subnet-a
 
+  DataSubnetAParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Description: !Sub Stores ${Project}-${Stage}-${Component} Data Subnet in AZ A
+      Tier: Standard
+      Name: !Sub /${Project}/${Stage}/${Component}/data-subnet-a/subnet-id
+      Value: !Ref DataSubnetA
+      Tags:
+        Name: !Sub ${Project}-${Stage}-${Component}-data-subnet-a-subnet-id
+
   DataRouteTableA:
     Type: AWS::EC2::RouteTable
     Properties:

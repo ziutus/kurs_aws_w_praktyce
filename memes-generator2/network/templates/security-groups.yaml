@@ -118,4 +118,15 @@ Resources:
           Value: !Sub ${Project}-${Stage}-${Component}-database-sg
       VpcId: !Ref VpcId
 
+  DataBaseSecurityGroupParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String 
+      Description: !Sub Stores ${Project}-${Stage}-${Component} Database security Group
+      Name: !Sub /${Project}/${Stage}/${Component}/database-sg/sg-id
+      Tier: Standard
+      Value: !Ref DataBaseSecurityGroup
+      Tags:
+        Name: !Sub ${Project}-${Stage}-${Component}-database-id
+    
 # Outputs:

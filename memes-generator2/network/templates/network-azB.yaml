@@ -103,13 +103,24 @@ Resources:
   DataSubnetB:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Select [0, !GetAZs '' ]
+      AvailabilityZone: !Select [1, !GetAZs '' ]
       VpcId: !Ref VpcId
       CidrBlock: !Ref DataSubnetBCidr
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
           Value: !Sub ${Project}-${Stage}-${Component}-data-subnet-b
+
+  DataSubnetBParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Description: !Sub Stores ${Project}-${Stage}-${Component} Data Subnet in AZ B
+      Tier: Standard
+      Name: !Sub /${Project}/${Stage}/${Component}/data-subnet-b/subnet-id
+      Value: !Ref DataSubnetB
+      Tags:
+        Name: !Sub ${Project}-${Stage}-${Component}-data-subnet-b-subnet-id
 
   DataRouteTableB:
     Type: AWS::EC2::RouteTable

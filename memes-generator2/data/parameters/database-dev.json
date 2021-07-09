@@ -1,0 +1,30 @@
+[
+    {
+        "ParameterKey": "Project",
+        "ParameterValue": "memes-generator2"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "data"
+    },
+    {
+        "ParameterKey": "Stage",
+        "ParameterValue": "dev"
+    },
+    {
+        "ParameterKey": "DatabaseName",
+        "ParameterValue": "memesgenerator2db"
+    },
+    {
+        "ParameterKey": "DataSubnetA",
+        "ParameterValue": "/memes-generator2/dev/network/data-subnet-a/subnet-id"
+    },
+    {
+        "ParameterKey": "DataSubnetB",
+        "ParameterValue": "/memes-generator2/dev/network/data-subnet-b/subnet-id"
+    },
+    {
+        "ParameterKey": "DatabaseSecurityGroup",
+        "ParameterValue": "/memes-generator2/dev/network/database-sg/sg-id"
+    }
+]
