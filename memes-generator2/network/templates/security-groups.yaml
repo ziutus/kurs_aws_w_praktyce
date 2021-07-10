@@ -99,6 +99,18 @@ Resources:
         - Key: Name
           Value: !Sub ${Project}-${Stage}-${Component}-application-sg   
 
+  ApplicationSecurityGroupParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String 
+      Description: !Sub Stores ${Project}-${Stage}-${Component} application security Group
+      Name: !Sub /${Project}/${Stage}/${Component}/application-sg/sg-id
+      Tier: Standard
+      Value: !Ref ApplicationSecurityGroup
+      Tags:
+        Name: !Sub ${Project}-${Stage}-${Component}-application-id
+
+
   DataBaseSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:

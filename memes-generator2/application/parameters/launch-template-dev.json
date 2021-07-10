@@ -1,0 +1,46 @@
+[
+    {
+        "ParameterKey": "Project",
+        "ParameterValue": "memes-generator2"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "application"
+    },
+    {
+        "ParameterKey": "Stage",
+        "ParameterValue": "dev"
+    },
+    {
+        "ParameterKey": "ImageId",
+        "ParameterValue": "ami-00b18b3deb7f286ca"
+    },
+    {
+        "ParameterKey": "InstanceType",
+        "ParameterValue": "t2.micro"
+    },
+    {
+        "ParameterKey": "InstanceRole",
+        "ParameterValue": "/memes-generator2/dev/application/application-instance-role/name"
+    },    
+    {
+        "ParameterKey": "ApplicationSecurityGroup",
+        "ParameterValue": "/memes-generator2/dev/network/application-sg/sg-id"
+    },
+    {
+        "ParameterKey": "CloudWatchConfigFile",
+        "ParameterValue": "cloudwatch-config-memes-generator-dev.json"
+    },
+    {
+        "ParameterKey": "ServiceName",
+        "ParameterValue": "memes-generator"
+    },
+    {
+        "ParameterKey": "ServiceConfigFile",
+        "ParameterValue": ".memesconf"
+    },
+    {
+        "ParameterKey": "S3ConfigurationBucket",
+        "ParameterValue": "/memes-generator2/dev/application/configuration-bucket/name"
+    }
+]
