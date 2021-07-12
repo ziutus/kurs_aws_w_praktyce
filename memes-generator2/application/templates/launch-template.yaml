@@ -59,7 +59,7 @@ Resources:
         InstanceType: !Ref InstanceType
         IamInstanceProfile:
           Arn: !GetAtt  InstanceProfile.Arn
-        SecurityGroups:
+        SecurityGroupIds:
           - !Ref ApplicationSecurityGroup
         Monitoring:
           Enabled: true
