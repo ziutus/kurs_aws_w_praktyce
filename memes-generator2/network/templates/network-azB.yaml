@@ -75,6 +75,17 @@ Resources:
         - Key: Name
           Value: !Sub ${Project}-${Stage}-${Component}-private-subnet-b
 
+  PrivateSubnetBParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Description: !Sub Stores ${Project}-${Stage}-${Component} Private Subnet in AZ B
+      Tier: Standard
+      Name: !Sub /${Project}/${Stage}/${Component}/private-subnet-b/subnet-id
+      Value: !Ref PrivateSubnetB
+      Tags:
+        Name: !Sub ${Project}-${Stage}-${Component}-private-subnet-b-subnet-id
+
   PrivateRouteTableB:
     Type: AWS::EC2::RouteTable
     Properties:
