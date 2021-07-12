@@ -13,7 +13,7 @@
     },
     {
         "ParameterKey": "ImageId",
-        "ParameterValue": "ami-00b18b3deb7f286ca"
+        "ParameterValue": "ami-00cba2d40f28affa5"
     },
     {
         "ParameterKey": "InstanceType",
@@ -29,7 +29,7 @@
     },
     {
         "ParameterKey": "CloudWatchConfigFile",
-        "ParameterValue": "cloudwatch-config-memes-generator-dev.json"
+        "ParameterValue": "cloudwatch-config-memes-generator2-dev.json"
     },
     {
         "ParameterKey": "ServiceName",
