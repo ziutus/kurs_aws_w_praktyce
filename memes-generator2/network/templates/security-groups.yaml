@@ -80,6 +80,17 @@ Resources:
           Value: !Sub ${Project}-${Stage}-${Component}-alb-sg
       VpcId: !Ref VpcId
 
+  AlbSecurityGroupParam:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Type: String
+        Description: !Sub Stores ${Project}-${Stage}-${Component} AlbSecurityGroup
+        Tier: Standard
+        Name: !Sub /${Project}/${Stage}/${Component}/alb-sg/sg-id
+        Value: !Ref AlbSecurityGroup
+        Tags:
+          Name: !Sub ${Project}-${Stage}-${Component}-alb-sg
+
   ApplicationSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -140,5 +151,5 @@ Resources:
       Value: !Ref DataBaseSecurityGroup
       Tags:
         Name: !Sub ${Project}-${Stage}-${Component}-database-id
-    
+
 # Outputs:
