@@ -1,0 +1,47 @@
+[
+    {
+        "ParameterKey": "Project",
+        "ParameterValue": "memes-generator2"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "network"
+    },
+    {
+        "ParameterKey": "Stage",
+        "ParameterValue": "dev"
+    },
+    {
+        "ParameterKey": "ApplicationPort",
+        "ParameterValue": "8080"
+    },
+    {
+        "ParameterKey": "VPCId",
+        "ParameterValue": "/memes-generator2/dev/network/vpc/vpc-id"
+    },
+    {
+        "ParameterKey": "LoadBalancer",
+        "ParameterValue": "/memes-generator2/dev/network/alb/arn"
+    },
+    {
+        "ParameterKey": "LaunchTemplateId",
+        "ParameterValue": "/memes-generator2/dev/application/application-launch-template/id"
+    },
+    {
+        "ParameterKey": "LaunchTemplateLatestVersion",
+        "ParameterValue": "/memes-generator2/dev/application/application-launch-template/latest-version"
+    },
+    {
+        "ParameterKey": "PrivateSubnetAId",
+        "ParameterValue": "/memes-generator2/dev/network/private-subnet-a/subnet-id"
+    },
+    {
+        "ParameterKey": "PrivateSubnetBId",
+        "ParameterValue": "/memes-generator2/dev/network/private-subnet-b/subnet-id"
+    },
+    {
+        "ParameterKey": "VPCId",
+        "ParameterValue": "/memes-generator2/dev/network/vpc/vpc-id"
+    }
+
+]
