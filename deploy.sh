@@ -3,10 +3,12 @@ set -e
 set -u 
 # set -x
 
-VERSION="1.3"
-VERSION_CODE_NAME="multi param version"
+VERSION="1.4"
+VERSION_CODE_NAME="region version"
 
-REGION=$(echo $AWS_REGION)
+REGION_DEFAULT=$(echo $AWS_REGION)
+REGION_FORCE=""
+REGION_PARAMS=""
 
 function show_variables() {
 cat << EOF
@@ -34,6 +36,7 @@ usage: $0
         -p|--project PROJECT_NAME
         -c|--component COMPONENT_NAME
         -P|--params PARAMS_NAME
+        -r|--region REGION
         --list-params
         --list-stacks
         --list-components
@@ -96,6 +99,7 @@ while [ $# -gt 0 ]; do
         -p|--project) shift; PROJECT_NAME=$1; shift;;
         -c|--component) shift; COMPONENT_NAME=$1; shift;;
         -P|--params) shift; PARAMS=$1; shift;;
+        -r|--region) shift; REGION_FORCE=$1; shift;;
         --list-params) shift; LIST_PARAMS=1;;
         --list-components) shift; LIST_COMPONENTS=1;;
         --list-stacks) shift; LIST_STACKS=1;;
@@ -106,6 +110,8 @@ while [ $# -gt 0 ]; do
     esac
 done;
 
+#TODO: Check if region has correct name if got from command line
+#TODO: Add support of s3 bucket for templates
 
 if  [ -z $PROJECT_NAME ]; then
     echo "guessing project name from path"
@@ -244,6 +250,29 @@ fi
 echo "All prechecks status [OK]";
 echo ""
 
+set +e
+set +u
+S3_BUCKET=$(aws ssm get-parameter --name /${PROJECT_NAME}/${STAGE}/operations/cloudformation-bucket/name --output text --query Parameter.Value --region $REGION 2>&1)
+RC=$?
+set -e
+set -u
+
+echo "Checking region setup"
+REGION=REGION_DEFAULT
+PARAMS_REGION=$(cat $PARAM_FILE | jq -r '.[] | select( .ParameterKey == "Region" ) | .ParameterValue ')
+echo "region default: >$REGION_DEFAULT<"
+echo "region from param file: >$PARAMS_REGION<"
+echo "region force: >$REGION_FORCE<"
+[ ! -z $PARAMS_REGION ] && REGION=$PARAMS_REGION
+[ ! -z $REGION_FORCE ] && REGION=$REGION_FORCE
+
+
+S3_BUCKET_PART=""
+if [[ $RC -eq 0 ]]; then 
+    echo "Found S3 bucket for Cloudformation templates"
+    S3_BUCKET_PART="--s3-bucket $S3_BUCKET "
+fi
+
 if [ -z $PARAMS ]; then
     STACK_NAME="${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${STACK_NAME}"
 else 
@@ -256,7 +285,7 @@ COMMAND="aws cloudformation deploy  \
     --capabilities CAPABILITY_NAMED_IAM \
     --no-fail-on-empty-changeset \
     --parameter-overrides file://$PARAM_FILE \
-    --region $REGION \
+    --region $REGION $S3_BUCKET_PART \
     --tags Project=$PROJECT_NAME Stage=$STAGE Component=$COMPONENT_NAME"
  
 echo $COMMAND
