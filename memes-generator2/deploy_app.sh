@@ -10,6 +10,13 @@ action='create_paid'
 
 STEP=12
 
+if [ ! -d $PROJECT ]; then
+    1>&2 echo STDERR "Can't find directory ./$PROJECT"
+    1>&2 echo "This script should be called from base diectory"
+    1>&2 echo "exiting..."
+    exit 2
+fi
+
 # [ $STEP -eq 10 ] && application/commands/upload-cw-config.sh && STEP=11
 # [ $STEP -eq 11 ] && application/commands/upload-srv-config.sh && STEP=12
 # [ $STEP -eq 11 ] && application/commands/upload-pictures.sh && STEP=13
