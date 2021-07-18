@@ -253,7 +253,7 @@ echo ""
 
 
 echo "Checking region setup"
-REGION=REGION_DEFAULT
+REGION=$REGION_DEFAULT
 PARAMS_REGION=$(cat $PARAM_FILE | jq -r '.[] | select( .ParameterKey == "Region" ) | .ParameterValue ')
 echo "region default: >$REGION_DEFAULT<"
 echo "region from param file: >$PARAMS_REGION<"
