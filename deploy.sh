@@ -111,7 +111,8 @@ while [ $# -gt 0 ]; do
 done;
 
 #TODO: Check if region has correct name if got from command line
-#TODO: Add support of s3 bucket for templates
+#TODO: Add check if s3 bucket for templates exist
+#TODO: Add task to create s3 bucket if needed
 
 if  [ -z $PROJECT_NAME ]; then
     echo "guessing project name from path"
@@ -250,26 +251,25 @@ fi
 echo "All prechecks status [OK]";
 echo ""
 
-set +e
-set +u
-S3_BUCKET=$(aws ssm get-parameter --name /${PROJECT_NAME}/${STAGE}/operations/cloudformation-bucket/name --output text --query Parameter.Value --region $REGION 2>&1)
-RC=$?
-set -e
-set -u
 
 echo "Checking region setup"
 REGION=REGION_DEFAULT
 PARAMS_REGION=$(cat $PARAM_FILE | jq -r '.[] | select( .ParameterKey == "Region" ) | .ParameterValue ')
 echo "region default: >$REGION_DEFAULT<"
 echo "region from param file: >$PARAMS_REGION<"
-echo "region force: >$REGION_FORCE<"
+echo "region from command line (overwrite all): >$REGION_FORCE<"
 [ ! -z $PARAMS_REGION ] && REGION=$PARAMS_REGION
 [ ! -z $REGION_FORCE ] && REGION=$REGION_FORCE
+echo "region final: >$REGION<"
 
 
+set +eu
+S3_BUCKET=$(aws ssm get-parameter --name /${PROJECT_NAME}/${STAGE}/operations/cloudformation-bucket/name --output text --query Parameter.Value --region $REGION 2>&1)
+RC=$?
+set -eu
 S3_BUCKET_PART=""
 if [[ $RC -eq 0 ]]; then 
-    echo "Found S3 bucket for Cloudformation templates"
+    echo "Found S3 bucket for Cloudformation templates: >$S3_BUCKET<"
     S3_BUCKET_PART="--s3-bucket $S3_BUCKET "
 fi
 
@@ -287,11 +287,13 @@ COMMAND="aws cloudformation deploy  \
     --parameter-overrides file://$PARAM_FILE \
     --region $REGION $S3_BUCKET_PART \
     --tags Project=$PROJECT_NAME Stage=$STAGE Component=$COMPONENT_NAME"
- 
+
+echo "" 
 echo $COMMAND
 
 if [ $EXEC -eq 0 ]; then
-    echo "it is preview, no action taken..."
+    echo ""
+    echo "it is preview, no action taken. Add --exec to execute command"
     exit 0
 fi
 
