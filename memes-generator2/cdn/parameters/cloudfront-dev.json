@@ -1,0 +1,30 @@
+[
+    {
+        "ParameterKey": "Project",
+        "ParameterValue": "memes-generator2"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "cdn"
+    },
+    {
+        "ParameterKey": "Stage",
+        "ParameterValue": "dev"
+    },
+    {
+        "ParameterKey": "Region",
+        "ParameterValue": "us-east-1"
+    },
+    {
+        "ParameterKey": "AlbUrl",
+        "ParameterValue": "/memes-generator2/dev/network/alb/url"
+    },
+    {
+        "ParameterKey": "S3WebsiteBucketName",
+        "ParameterValue": "/memes-generator2/dev/application/website-bucket/name"
+    },
+    {
+        "ParameterKey": "WAF",
+        "ParameterValue": "/memes-generator2/dev/waf/web-acl/id"
+    }
+]
