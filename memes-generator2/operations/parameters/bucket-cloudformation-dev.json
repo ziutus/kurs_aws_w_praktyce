@@ -14,5 +14,9 @@
     {
         "ParameterKey": "BucketFunction",
         "ParameterValue": "cloudformation"
+    },
+    {
+        "ParameterKey": "Region",
+        "ParameterValue": "us-east-1"
     }
 ]
