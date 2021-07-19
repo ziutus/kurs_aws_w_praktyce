@@ -10,6 +10,9 @@ REGION_DEFAULT=$(echo $AWS_REGION)
 REGION_FORCE=""
 REGION_PARAMS=""
 
+STAGE=$(echo $STAGE)
+PROJECT_NAME=$(echo $PROJECT)
+
 function show_variables() {
 cat << EOF
 base dirname: >$DIRNAME<
@@ -80,8 +83,6 @@ function listParamFiles() {
 
 
 STACK_NAME=""
-STAGE=""
-PROJECT_NAME=""
 COMPONENT_NAME=""
 DIR_NAME=""
 PARAMS=""
