@@ -1,3 +1,4 @@
 var Configs = {
     "ApiURL": "",
-    "PhotosURL": ""};
+    "PhotosURL": ""
+};
