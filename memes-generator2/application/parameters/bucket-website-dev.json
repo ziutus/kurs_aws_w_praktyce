@@ -1,0 +1,22 @@
+[
+    {
+        "ParameterKey": "Project",
+        "ParameterValue": "memes-generator2"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "application"
+    },
+    {
+        "ParameterKey": "Stage",
+        "ParameterValue": "dev"
+    },
+    {
+        "ParameterKey": "BucketFunction",
+        "ParameterValue": "website"
+    },
+    {
+        "ParameterKey": "Region",
+        "ParameterValue": "us-east-1"
+    }
+]
