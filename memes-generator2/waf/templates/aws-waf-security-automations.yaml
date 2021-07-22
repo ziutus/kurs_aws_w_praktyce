@@ -1740,7 +1740,7 @@ Resources:
       Description: !Sub Stores ${Project}-${Stage}-${Component} web acl id
       Tier: Standard
       Name: !Sub /${Project}/${Stage}/${Component}/web-acl/id
-      Value: !GetAtt WebACLStack.Outputs.WAFWebACL
+      Value: !GetAtt WebACLStack.Outputs.WAFWebACLArn
       Tags:
         Name: !Sub ${Project}-${Stage}-${Component}-web-acl-id
 

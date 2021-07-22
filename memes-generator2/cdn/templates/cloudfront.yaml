@@ -20,9 +20,9 @@ Parameters:
   S3WebsiteBucketName:
     Description: Name of bucket which stores static frontend website
     Type: AWS::SSM::Parameter::Value<String>
-  # WAF: # This should be commented out if WAF is not used at all
-  #   Description: Web ACL ID for use with the distribution
-  #   Type: AWS::SSM::Parameter::Value<String>
+  WAF: # This should be commented out if WAF is not used at all
+    Description: Web ACL ID for use with the distribution
+    Type: AWS::SSM::Parameter::Value<String>
 
 Resources:
   Distribution:
@@ -106,7 +106,7 @@ Resources:
             PathPattern: '/download/*'
             ForwardedValues:
               QueryString: true
-        # WebACLId: !Ref WAF # This should be commented out if WAF is not used with AWS CloudFront
+        WebACLId: !Ref WAF # This should be commented out if WAF is not used with AWS CloudFront
       Tags:
         - Key: Name
           Value: !Sub ${Project}-${Stage}-${Component}-cdn
