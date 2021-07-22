@@ -4,6 +4,7 @@ set -e
 
 # PROJECT="memes-generator2"
 # STAGE="dev"
+action=""
 STEP=12
 
 while [ $# -gt 0 ]; do
@@ -37,14 +38,22 @@ if [ ! -d $PROJECT ]; then
     exit 2
 fi
 
+if [ -z $action ]; then 
+    1>&2 echo "No action! You should use one of --delete or --create"
+    1>&2 echo "exiting..."
+    exit 2
+fi
+
 # [ $STEP -eq 10 ] && application/commands/upload-cw-config.sh && STEP=11
 # [ $STEP -eq 11 ] && application/commands/upload-srv-config.sh && STEP=12
 # [ $STEP -eq 11 ] && application/commands/upload-pictures.sh && STEP=13
 
-if [ $action == "delete_paid" ]; then
+if [ "$action" == "delete_paid" ]; then
     set +x
     echo "Stopping db instance - it can take 2-3 minutes"
     aws rds stop-db-instance --db-instance-identifier ${PROJECT}-${STAGE}-data-db
+    aws cloudformation delete-stack --stack ${PROJECT}-${STAGE}-waf-aws-waf-security-automations --region "us-east-1"
+
     aws cloudformation delete-stack --stack ${PROJECT}-${STAGE}-cdn-cloudfront --region "us-east-1"
     aws cloudformation delete-stack --stack ${PROJECT}-${STAGE}-network-load-balancing
     aws cloudformation delete-stack --stack ${PROJECT}-${STAGE}-network-application-auto-scaling
@@ -55,7 +64,7 @@ if [ $action == "delete_paid" ]; then
     set -x
 fi
 
-if [ $action == "create_paid" ]; then
+if [ "$action" == "create_paid" ]; then
     echo "Starting db instance - it can take 2-3 minutes"
     # TODO add check if db is already started
     aws rds start-db-instance --db-instance-identifier ${PROJECT}-${STAGE}-data-db
@@ -68,6 +77,7 @@ if [ $action == "create_paid" ]; then
 
     $PROJECT/cdn/commands/copy_ssm_parameters.sh
 
+    ./deploy.sh --component waf --stack aws-waf-security-automations -exec
     ./deploy.sh --component cdn --stack cloudfront --exec
 
 fi
