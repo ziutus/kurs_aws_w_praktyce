@@ -6,14 +6,18 @@ PROJECT_NAME=""
 COMPONENT_NAME=""
 STACK_NAME=""
 STAGE=""
+SHARED_STAGE=""
 PARAMS=""
+
+PARAMS_STAGES_PART=""
 
 while [ $# -gt 0 ]; do
     case $1 in
         -h|--help) shift; usage;;
         -p|--project) shift; PROJECT_NAME=$1; shift;;
         -c|--component) shift; COMPONENT_NAME=$1; shift;;
-        -s|--stage) shift; STAGE=$1; shift;;
+        -s|--stage) shift; STAGE=$1; SHARED_STAGE=""; shift;;
+        --shared-stage) shift; STAGE=""; SHARED_STAGE=$1; shift;;
         -S|--stack) shift; STACK_NAME=$1; shift;;
         -P|--params) shift; PARAMS=$1; shift;;
 
@@ -33,11 +37,61 @@ fi
 
 mkdir -p $PROJECT_NAME/$COMPONENT_NAME/{commands,parameters,templates}
 
-if [ ! -z $STACK_NAME ]; then 
+if [ -z $STACK_NAME ]; then 
+  exit 0
+fi
 
-  TEMPLATE_FILE="$PROJECT_NAME/$COMPONENT_NAME/templates/${STACK_NAME}.yaml"
-  if [ ! -f $TEMPLATE_FILE ]; then 
-    cat << OEF > $TEMPLATE_FILE
+PARAM_FILE_NAME_PART=""
+
+if [ ! -z $STAGE ]; then
+
+    if [ -z $PARAMS ]; then
+      PARAM_FILE_NAME_PART="-${STAGE}"
+    else 
+      PARAM_FILE_NAME_PART="-${PARAMS}-${STAGE}"
+    fi
+
+    TEMPLATE_STAGES_PART="  Stage:
+      Description: Stage name for resource
+      Type: String
+    "
+
+ PARAMS_STAGES_PART=",
+    {
+        \"ParameterKey\": \"Stage\",
+        \"ParameterValue\": \"$STAGE\"
+    }"
+elif [ ! -z $SHARED_STAGE ]; then
+
+    if [ -z $PARAMS ]; then
+      PARAM_FILE_NAME_PART="-${SHARED_STAGE}"
+    else 
+      PARAM_FILE_NAME_PART="-${PARAMS}-${SHARED_STAGE}"
+    fi
+
+ TEMPLATE_STAGES_PART="  SharedStage:
+    Description: Stage name for shared resources
+    Type: String
+ "
+
+ PARAMS_STAGES_PART=",
+    {
+        \"ParameterKey\": \"SharedStage\",
+        \"ParameterValue\": \"$SHARED_STAGE\"
+    }"
+else 
+    if [ ! -z $PARAMS ]; then
+      PARAM_FILE_NAME_PART="-${PARAMS}"
+    fi
+fi
+
+echo "Creating files "
+PARAM_FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/${STACK_NAME}${PARAM_FILE_NAME_PART}.json"
+TEMPLATE_FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/templates/${STACK_NAME}.yaml"
+
+if [ ! -f $TEMPLATE_FILE_NAME ]; then 
+    echo "Creating tempalte file: >$TEMPLATE_FILE_NAME<"
+    cat << OEF > $TEMPLATE_FILE_NAME
 AWSTemplateFormatVersion: 2010-09-09
 Description: Put here your description
 
@@ -52,10 +106,7 @@ Parameters:
     Description: Name of the component
     Type: String
     AllowedPattern: ^[a-z][a-zA-Z0-9-]{2,15}$
-  Stage:
-    Description: Stage name
-    Type: String
-    AllowedPattern: ^[a-z][a-zA-Z0-9-]{2,15}$
+${TEMPLATE_STAGES_PART}
 
 Resources:
 
@@ -65,60 +116,26 @@ Conditions:
 
 Outputs:
 OEF
-  fi
-
-  if [ -z $STAGE ]; then
-    if [ -z $PARAMS ]; then
-      FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/$STACK_NAME.json"
-    else 
-      FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/$STACK_NAME-${PARAMS}.json"
-    fi
-    
-    if [ -f $FILE_NAME ]; then
-      echo "The file $FILE_NAME exist, not creating new one"
-    else
-      cat << EOF > $FILE_NAME
-[
-    {
-        "ParameterKey": "Project",
-        "ParameterValue": "$PROJECT_NAME"
-    },
-    {
-        "ParameterKey": "Component",
-        "ParameterValue": "$COMPONENT_NAME"
-    }
-]
-EOF
-    fi
-  else 
-    if [ -z $PARAMS ]; then
-      FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/$STACK_NAME-${STAGE}.json"
-    else 
-      FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/$STACK_NAME-${PARAMS}-${STAGE}.json"
-    fi
-    
-
-    if [ -f $FILE_NAME ]; then
-      echo "The file $FILE_NAME exist, not creating new one"
-    else 
-      cat << EOF > $FILE_NAME
-[
-    {
-        "ParameterKey": "Project",
-        "ParameterValue": "$PROJECT_NAME"
-    },
-    {
-        "ParameterKey": "Component",
-        "ParameterValue": "$COMPONENT_NAME"
-    },
-    {
-        "ParameterKey": "Stage",
-        "ParameterValue": "$STAGE"
-    }
-]
-EOF
-    fi
-  fi
 fi
+
+
+if [ -f $PARAM_FILE_NAME ]; then
+      echo "The file $PARAM_FILE_NAME exist, not creating new one"
+      exit 0
+fi
+
+echo "Creating param file: >$PARAM_FILE_NAME<"
+cat << EOF > $PARAM_FILE_NAME
+[
+    {
+        "ParameterKey": "Project",
+        "ParameterValue": "$PROJECT_NAME"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "$COMPONENT_NAME"
+    }${PARAMS_STAGES_PART}
+]
+EOF
 
 exit 0;

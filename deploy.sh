@@ -11,6 +11,7 @@ REGION_FORCE=""
 REGION_PARAMS=""
 
 STAGE=$(echo $STAGE)
+SHARED_STAGE=$(echo $SHARED_STAGE)
 PROJECT_NAME=$(echo $PROJECT)
 
 function show_variables() {
@@ -35,6 +36,7 @@ usage: $0
 
         -h|--help
         -s|--stage STAGE_NAME
+        -shared-stage STAGE_NAME
         -S|--stack STACK_NAME
         -p|--project PROJECT_NAME
         -c|--component COMPONENT_NAME
@@ -95,7 +97,8 @@ EXEC=0
 while [ $# -gt 0 ]; do
     case $1 in
         -h|--help) shift; usage;;
-        -s|--stage) shift; STAGE=$1; shift;;
+        -s|--stage) shift; STAGE=$1; SHARED_STAGE=""; shift;;
+        --shared-stage) shift; SHARED_STAGE=$1; STAGE=""; shift;;
         -S|--stack) shift; STACK_NAME=$1; shift;;
         -p|--project) shift; PROJECT_NAME=$1; shift;;
         -c|--component) shift; COMPONENT_NAME=$1; shift;;
@@ -164,8 +167,8 @@ TEMPLATE=""
 TEMPLATE_FILE=""
 PARAM_FILE=""
 
-if [ -z $STAGE ]; then 
-    echo "A parameter --stage is missing. "
+if [ -z $STAGE ] && [ -z $SHARED_STAGE ]; then 
+    echo "A parameter --stage or --shared-stage is missing. "
     usage
 fi
 
@@ -182,6 +185,9 @@ echo -n "Checking if template file exist in $COMPONENT_PATH/templates/"
 if [ -f "$COMPONENT_PATH/templates/${STACK_NAME}-${STAGE}.yaml" ]; then
     TEMPLATE_FILE="$COMPONENT_PATH/${STACK_NAME}-${STAGE}.yaml"
     echo " [OK]"
+elif [ -f "$COMPONENT_PATH/templates/${STACK_NAME}-${SHARED_STAGE}.yaml" ]; then
+    TEMPLATE_FILE="$COMPONENT_PATH/${STACK_NAME}-${SHARED_STAGE}.yaml"
+    echo " [OK]"    
 else
     TEMPLATE_FILE="$COMPONENT_PATH/templates/${STACK_NAME}.yaml"
     if [ ! -f $TEMPLATE_FILE ]; then 
@@ -196,6 +202,8 @@ if [ -z $PARAMS ]; then
     echo -n "Checking if default parameter file exist in $COMPONENT_PATH/parameters/"
     if [ -f "$COMPONENT_PATH/parameters/${STACK_NAME}-${STAGE}.json" ]; then
         PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${STAGE}.json"
+    elif [ -f "$COMPONENT_PATH/parameters/${STACK_NAME}-${SHARED_STAGE}.json" ]; then
+        PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${SHARED_STAGE}.json"
     else
         PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}.json"
         if [ ! -f $PARAM_FILE ]; then 
@@ -207,6 +215,8 @@ else
     echo -n "Checking if special parameter file exist in $COMPONENT_PATH/parameters/"
     if [ -f "$COMPONENT_PATH/parameters/${STACK_NAME}-${PARAMS}-${STAGE}.json" ]; then
         PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${PARAMS}-${STAGE}.json"
+    elif [ -f "$COMPONENT_PATH/parameters/${STACK_NAME}-${PARAMS}-${SHARED_STAGE}.json" ]; then
+        PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${PARAMS}-${SHARED_STAGE}.json"
     else
         PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${PARAMS}.json"
         if [ ! -f $PARAM_FILE ]; then 
@@ -229,14 +239,19 @@ else
     exit 4
 fi
 
-echo -n "  -- Checking STAGE"
+echo -n "  -- Checking STAGE or SHARED_STAGE"
 PARAMS_STAGE=$(cat $PARAM_FILE | jq -r '.[] | select( .ParameterKey == "Stage" ) | .ParameterValue ')
 if [ "$PARAMS_STAGE" == "$STAGE" ]; then
     echo " [OK]";
 else 
-    echo " [ERROR!]";
-    echo "Stage name in PARAM file >$PARAM_FILE< is different that >$STAGE< from command line, please check Param file "
-    exit 4
+    PARAMS_SHARED_STAGE=$(cat $PARAM_FILE | jq -r '.[] | select( .ParameterKey == "SharedStage" ) | .ParameterValue ')
+    if [ "$PARAMS_SHARED_STAGE" == "$SHARED_STAGE" ] && [ ! -z $SHARED_STAGE ]; then
+        echo " [OK]";
+    else 
+        echo " [ERROR!]";
+        echo "Stage name (or shared stage name) in PARAM file >$PARAM_FILE< is different that >$STAGE< from command line, please check Param file "
+        exit 4
+    fi
 fi
 
 echo -n "  -- Checking COMPONENT"
@@ -275,9 +290,23 @@ if [[ $RC -eq 0 ]]; then
 fi
 
 if [ -z $PARAMS ]; then
-    STACK_NAME="${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${STACK_NAME}"
+    if [ ! -z $STAGE ]; then 
+        STACK_NAME="${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${STACK_NAME}"
+    elif [ ! -z $SHARED_STAGE ]; then
+        STACK_NAME="${PROJECT_NAME}-${SHARED_STAGE}-${COMPONENT_NAME}-${STACK_NAME}"
+    fi    
 else 
-    STACK_NAME="${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${PARAMS}-${STACK_NAME}"
+    if [ ! -z $STAGE ]; then 
+        STACK_NAME="${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${PARAMS}-${STACK_NAME}"
+    elif [ ! -z $SHARED_STAGE ]; then
+        STACK_NAME="${PROJECT_NAME}-${SHARED_STAGE}-${COMPONENT_NAME}-${PARAMS}-${STACK_NAME}"
+    fi
+fi
+
+if [ ! -z $STAGE ]; then 
+    STAGE_TAG="Stage=$STAGE"
+else
+    STAGE_TAG="SharedStage=$SHARED_STAGE"
 fi
 
 COMMAND="aws cloudformation deploy  \
@@ -287,7 +316,7 @@ COMMAND="aws cloudformation deploy  \
     --no-fail-on-empty-changeset \
     --parameter-overrides file://$PARAM_FILE \
     --region $REGION $S3_BUCKET_PART \
-    --tags Project=$PROJECT_NAME Stage=$STAGE Component=$COMPONENT_NAME"
+    --tags Project=$PROJECT_NAME $STAGE_TAG Component=$COMPONENT_NAME"
 
 echo "" 
 echo $COMMAND
