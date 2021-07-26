@@ -6,7 +6,7 @@ Parameters:
     Description: Project name
     Type: String
     AllowedPattern: ^[a-z][a-zA-Z0-9-]{3,25}$
-  SharedStage:
+  Stage:
     Description: Shared Stage name
     Type: String
   Component:
@@ -55,7 +55,7 @@ Resources:
                   # - !Ref SecondaryKmsKeyArn
       Tags:
         - Key: Name
-          Value: !Sub ${Project}-${SharedStage}-${Component}-deployment-role
+          Value: !Sub ${Project}-shared-${Stage}-${Component}-deployment-role
 
   ServiceRole:
     Type: AWS::IAM::Role
@@ -113,8 +113,27 @@ Resources:
                   - !GetAtt DeploymentRole.Arn
       Tags:
         - Key: Name
-          Value: !Sub ${Project}-${SharedStage}-${Component}-service-role
+          Value: !Sub ${Project}-shared-${Stage}-${Component}-service-role
 
+  DevAccountDeploymentRoleNameParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type:  String
+      Name: !Sub /${Project}/-shared-${Stage}/${Component}/deployment-role-dev/name
+      Value: !Ref DeploymentRole
+      Description: Stores the name of the deployment role in the development account
+      Tags:
+        Name: !Sub ${Project}-shared-${Stage}-${Component}-deployment-role-dev-name
+
+  DevAccountServiceRoleNameParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type:  String
+      Name: !Sub /${Project}/-shared-${Stage}/${Component}/service-role-dev/name
+      Value: !Ref ServiceRole
+      Description: Stores the name of the service role in the development account
+      Tags:
+        Name: !Sub ${Project}-shared-${Stage}-${Component}-service-role-dev-name
 Outputs:
   DeploymentRoleName:
     Value: !Ref DeploymentRole

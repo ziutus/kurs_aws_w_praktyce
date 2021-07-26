@@ -12,6 +12,10 @@
         "ParameterValue": "shared-dev"
     },
     {
+        "ParameterKey": "Stage",
+        "ParameterValue": "dev"
+    },
+    {
         "ParameterKey": "KmsKeyArn",
         "ParameterValue": "/memes-generator2-cicd2/shared-dev/cicd/kms-key/arn"
     },
