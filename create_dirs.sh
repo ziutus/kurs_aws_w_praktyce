@@ -106,7 +106,7 @@ Parameters:
   Project:
     Description: Project name
     Type: String
-    AllowedPattern: ^[a-z][a-zA-Z0-9-]{3,20}$
+    AllowedPattern: ^[a-z][a-zA-Z0-9-]{3,25}$
   Component:
     Description: Name of the component
     Type: String
