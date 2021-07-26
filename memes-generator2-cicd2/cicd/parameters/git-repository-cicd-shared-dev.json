@@ -1,0 +1,18 @@
+[
+    {
+        "ParameterKey": "Project",
+        "ParameterValue": "memes-generator2-cicd2"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "cicd"
+    },
+    {
+        "ParameterKey": "SharedStage",
+        "ParameterValue": "shared-dev"
+    },
+    {
+        "ParameterKey": "Type",
+        "ParameterValue": "cicd"
+    }
+]

@@ -1,0 +1,30 @@
+[
+    {
+        "ParameterKey": "Project",
+        "ParameterValue": "memes-generator2-cicd2"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "cicd"
+    },
+    {
+        "ParameterKey": "SharedStage",
+        "ParameterValue": "shared-dev"
+    },
+    {
+        "ParameterKey": "DevAccountId",
+        "ParameterValue": "872324770694"
+    },
+    {
+        "ParameterKey": "ProdAccountId",
+        "ParameterValue": "872324770694"
+    },
+    {
+        "ParameterKey": "SharedResourcesAccountId",
+        "ParameterValue": "872324770694"
+    },
+    {
+        "ParameterKey": "TestAccountId",
+        "ParameterValue": "872324770694"
+    }
+]
