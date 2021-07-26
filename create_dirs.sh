@@ -72,6 +72,11 @@ elif [ ! -z $SHARED_STAGE ]; then
  TEMPLATE_STAGES_PART="  SharedStage:
     Description: Stage name for shared resources
     Type: String
+    AllowedValues:
+      - shared-dev
+      - shared-test
+      - shared
+
  "
 
  PARAMS_STAGES_PART=",
