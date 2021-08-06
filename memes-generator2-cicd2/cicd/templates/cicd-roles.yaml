@@ -119,7 +119,7 @@ Resources:
     Type: AWS::SSM::Parameter
     Properties:
       Type:  String
-      Name: !Sub /${Project}/-shared-${Stage}/${Component}/deployment-role-dev/name
+      Name: !Sub /${Project}/shared-${Stage}/${Component}/deployment-role-dev/name
       Value: !Ref DeploymentRole
       Description: Stores the name of the deployment role in the development account
       Tags:
@@ -129,7 +129,7 @@ Resources:
     Type: AWS::SSM::Parameter
     Properties:
       Type:  String
-      Name: !Sub /${Project}/-shared-${Stage}/${Component}/service-role-dev/name
+      Name: !Sub /${Project}/shared-${Stage}/${Component}/service-role-dev/name
       Value: !Ref ServiceRole
       Description: Stores the name of the service role in the development account
       Tags:
