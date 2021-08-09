@@ -37,13 +37,14 @@ usage: $0
         -h|--help
         -s|--stage STAGE_NAME
         -shared-stage STAGE_NAME
-        -S|--stack STACK_NAME
+        -S|--stack-name STACK_NAME
+        -t|--template-name TEMPLATE_NAME
         -p|--project PROJECT_NAME
         -c|--component COMPONENT_NAME
         -P|--params PARAMS_NAME
         -r|--region REGION
         --list-params
-        --list-stacks
+        --list-templates
         --list-components
         --list-projects
         --exec
@@ -68,8 +69,8 @@ function listComponents() {
     exit 1
 }
 
-function listStacks() {
-    echo "Possible stacks in >$COMPONENT_PATH/templates<:"
+function listTemplates() {
+    echo "Templates in >$COMPONENT_PATH/templates<:"
     find $COMPONENT_PATH/templates -mindepth 1 -maxdepth 1 -type f
     exit 1
 
@@ -85,13 +86,14 @@ function listParamFiles() {
 
 
 STACK_NAME=""
+STACK_NAME_SHORT=""
 COMPONENT_NAME=""
 DIR_NAME=""
 PARAMS=""
 LIST_PROJECTS=0
 LIST_PARAMS=0
 LIST_COMPONENTS=0
-LIST_STACKS=0
+LIST_TEMPLATES=0
 EXEC=0
 
 while [ $# -gt 0 ]; do
@@ -99,14 +101,15 @@ while [ $# -gt 0 ]; do
         -h|--help) shift; usage;;
         -s|--stage) shift; STAGE=$1; SHARED_STAGE=""; shift;;
         --shared-stage) shift; SHARED_STAGE=$1; STAGE=""; shift;;
-        -S|--stack) shift; STACK_NAME=$1; shift;;
+        -S|--stack-name) shift; STACK_NAME_SHORT=$1; shift;;
+        -t|--template-name) shift; TEMPLATE_NAME=$1; shift;;
         -p|--project) shift; PROJECT_NAME=$1; shift;;
         -c|--component) shift; COMPONENT_NAME=$1; shift;;
         -P|--params) shift; PARAMS=$1; shift;;
         -r|--region) shift; REGION_FORCE=$1; shift;;
         --list-params) shift; LIST_PARAMS=1;;
         --list-components) shift; LIST_COMPONENTS=1;;
-        --list-stacks) shift; LIST_STACKS=1;;
+        --list-templates) shift; LIST_TEMPLATES=1;;
         --list-projects) shift; LIST_PROJECTS=1;;
         --exec) shift; EXEC=1;;
         --preview) shift; EXEC=0;;
@@ -166,30 +169,31 @@ fi
 TEMPLATE=""
 TEMPLATE_FILE=""
 PARAM_FILE=""
+PARAM_FILE_SHORT=""
 
 if [ -z $STAGE ] && [ -z $SHARED_STAGE ]; then 
     echo "A parameter --stage or --shared-stage is missing. "
     usage
 fi
 
-[ $LIST_STACKS -eq 1 ] && listStacks
+[ $LIST_TEMPLATES -eq 1 ] && listTemplates
 
-if [ -z $STACK_NAME ]; then 
-    echo "A parameter --stack is missing. "
+if [ -z $TEMPLATE_NAME ]; then 
+    echo "A parameter --template-name is missing. "
     listStacks
 fi
 
 [ $LIST_PARAMS -eq 1 ] && listParamFiles
 
 echo -n "Checking if template file exist in $COMPONENT_PATH/templates/"
-if [ -f "$COMPONENT_PATH/templates/${STACK_NAME}-${STAGE}.yaml" ]; then
-    TEMPLATE_FILE="$COMPONENT_PATH/${STACK_NAME}-${STAGE}.yaml"
+if [ -f "$COMPONENT_PATH/templates/${TEMPLATE_NAME}-${STAGE}.yaml" ]; then
+    TEMPLATE_FILE="$COMPONENT_PATH/${TEMPLATE_NAME}-${STAGE}.yaml"
     echo " [OK]"
-elif [ -f "$COMPONENT_PATH/templates/${STACK_NAME}-${SHARED_STAGE}.yaml" ]; then
-    TEMPLATE_FILE="$COMPONENT_PATH/${STACK_NAME}-${SHARED_STAGE}.yaml"
+elif [ -f "$COMPONENT_PATH/templates/${TEMPLATE_NAME}-${SHARED_STAGE}.yaml" ]; then
+    TEMPLATE_FILE="$COMPONENT_PATH/${TEMPLATE_NAME}-${SHARED_STAGE}.yaml"
     echo " [OK]"    
 else
-    TEMPLATE_FILE="$COMPONENT_PATH/templates/${STACK_NAME}.yaml"
+    TEMPLATE_FILE="$COMPONENT_PATH/templates/${TEMPLATE_NAME}.yaml"
     if [ ! -f $TEMPLATE_FILE ]; then 
         echo "Can't file template file >$TEMPLATE_FILE<, is this correct stack?"
         exit 2
@@ -200,12 +204,15 @@ fi
 echo "params >$PARAMS< "
 if [ -z $PARAMS ]; then
     echo -n "Checking if default parameter file exist in $COMPONENT_PATH/parameters/"
-    if [ -f "$COMPONENT_PATH/parameters/${STACK_NAME}-${STAGE}.json" ]; then
-        PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${STAGE}.json"
-    elif [ -f "$COMPONENT_PATH/parameters/${STACK_NAME}-${SHARED_STAGE}.json" ]; then
-        PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${SHARED_STAGE}.json"
+    if [ -f "$COMPONENT_PATH/parameters/${TEMPLATE_NAME}-${STAGE}.json" ]; then
+        PARAM_FILE="$COMPONENT_PATH/parameters/${TEMPLATE_NAME}-${STAGE}.json"
+        PARAM_FILE_SHORT="${TEMPLATE_NAME}-${STAGE}.json"
+    elif [ -f "$COMPONENT_PATH/parameters/${TEMPLATE_NAME}-${SHARED_STAGE}.json" ]; then
+        PARAM_FILE="$COMPONENT_PATH/parameters/${TEMPLATE_NAME}-${SHARED_STAGE}.json"
+        PARAM_FILE_SHORT="${TEMPLATE_NAME}-${SHARED_STAGE}.json"
     else
-        PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}.json"
+        PARAM_FILE="$COMPONENT_PATH/parameters/${TEMPLATE_NAME}.json"
+        PARAM_FILE_SHORT="${TEMPLATE_NAME}.json"
         if [ ! -f $PARAM_FILE ]; then 
             echo "Can't file parameters file >$PARAM_FILE<, is this correct stack?"
             exit 2
@@ -213,18 +220,20 @@ if [ -z $PARAMS ]; then
     fi
 else 
     echo -n "Checking if special parameter file exist in $COMPONENT_PATH/parameters/"
-    if [ -f "$COMPONENT_PATH/parameters/${STACK_NAME}-${PARAMS}-${STAGE}.json" ]; then
-        PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${PARAMS}-${STAGE}.json"
-    elif [ -f "$COMPONENT_PATH/parameters/${STACK_NAME}-${PARAMS}-${SHARED_STAGE}.json" ]; then
-        PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${PARAMS}-${SHARED_STAGE}.json"
+    if [ -f "$COMPONENT_PATH/parameters/${TEMPLATE_NAME}-${PARAMS}-${STAGE}.json" ]; then
+        PARAM_FILE="$COMPONENT_PATH/parameters/${TEMPLATE_NAME}-${PARAMS}-${STAGE}.json"
+        PARAM_FILE_SHORT="${TEMPLATE_NAME}-${PARAMS}-${STAGE}.json"
+    elif [ -f "$COMPONENT_PATH/parameters/${TEMPLATE_NAME}-${PARAMS}-${SHARED_STAGE}.json" ]; then
+        PARAM_FILE="$COMPONENT_PATH/parameters/${TEMPLATE_NAME}-${PARAMS}-${SHARED_STAGE}.json"
+        PARAM_FILE_SHORT="${TEMPLATE_NAME}-${PARAMS}-${SHARED_STAGE}.json"
     else
-        PARAM_FILE="$COMPONENT_PATH/parameters/${STACK_NAME}-${PARAMS}.json"
+        PARAM_FILE="$COMPONENT_PATH/parameters/${TEMPLATE_NAME}-${PARAMS}.json"
+        PARAM_FILE_SHORT="${TEMPLATE_NAME}-${PARAMS}.json"
         if [ ! -f $PARAM_FILE ]; then 
             echo "Can't file parameters file >$PARAM_FILE<, is this correct stack?"
             exit 2
         fi
     fi
-
 fi
 echo " [OK]"
 
@@ -289,19 +298,32 @@ if [[ $RC -eq 0 ]]; then
     S3_BUCKET_PART="--s3-bucket $S3_BUCKET "
 fi
 
+
+echo "Creating stack name "
+PARAMS_STACK_NAME=$(cat $PARAM_FILE | jq -r '.[] | select( .ParameterKey == "StackName" ) | .ParameterValue ')
+echo "StackName in param file: >$PARAMS_STACK_NAME<"
+
+STACK_NAME_TMP=""
+if [ -z $STACK_NAME_SHORT ]; then
+    STACK_NAME_TMP=$TEMPLATE_NAME
+else 
+    STACK_NAME_TMP=$STACK_NAME_SHORT
+fi
+
 if [ -z $PARAMS ]; then
     if [ ! -z $STAGE ]; then 
-        STACK_NAME="${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${STACK_NAME}"
+        STACK_NAME="${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${STACK_NAME_TMP}"
     elif [ ! -z $SHARED_STAGE ]; then
-        STACK_NAME="${PROJECT_NAME}-${SHARED_STAGE}-${COMPONENT_NAME}-${STACK_NAME}"
+        STACK_NAME="${PROJECT_NAME}-${SHARED_STAGE}-${COMPONENT_NAME}-${STACK_NAME_TMP}"
     fi    
 else 
     if [ ! -z $STAGE ]; then 
-        STACK_NAME="${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${PARAMS}-${STACK_NAME}"
+        STACK_NAME="${PROJECT_NAME}-${STAGE}-${COMPONENT_NAME}-${PARAMS}-${STACK_NAME_TMP}"
     elif [ ! -z $SHARED_STAGE ]; then
-        STACK_NAME="${PROJECT_NAME}-${SHARED_STAGE}-${COMPONENT_NAME}-${PARAMS}-${STACK_NAME}"
+        STACK_NAME="${PROJECT_NAME}-${SHARED_STAGE}-${COMPONENT_NAME}-${PARAMS}-${STACK_NAME_TMP}"
     fi
 fi
+echo "Final stack name: >$STACK_NAME<"
 
 if [ ! -z $STAGE ]; then 
     STAGE_TAG="Stage=$STAGE"
@@ -316,7 +338,7 @@ COMMAND="aws cloudformation deploy  \
     --no-fail-on-empty-changeset \
     --parameter-overrides file://$PARAM_FILE \
     --region $REGION $S3_BUCKET_PART \
-    --tags Project=$PROJECT_NAME $STAGE_TAG Component=$COMPONENT_NAME"
+    --tags Project=$PROJECT_NAME $STAGE_TAG Component=$COMPONENT_NAME ParamFile=$PARAM_FILE_SHORT Template=$TEMPLATE_NAME"
 
 echo "" 
 echo $COMMAND
