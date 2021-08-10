@@ -11,6 +11,30 @@ PARAMS=""
 
 PARAMS_STAGES_PART=""
 
+function usage() {
+
+cat << EOF
+usage: $0 
+
+        -h|--help
+        -s|--stage STAGE_NAME
+        -shared-stage STAGE_NAME
+        -S|--stack STACK_NAME
+        -p|--project PROJECT_NAME
+        -c|--component COMPONENT_NAME
+        -P|--params PARAMS_NAME
+        -r|--region REGION (not implemented yet)
+
+  SHELL variables used by script (not implemented yet):
+      PROJECT_NAME: $PROJECT_NAME
+      COMPONENT_NAME: $COMPONENT_NAME
+
+EOF
+
+    # show_variables
+    exit 1
+}
+
 while [ $# -gt 0 ]; do
     case $1 in
         -h|--help) shift; usage;;
