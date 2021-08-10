@@ -1,0 +1,38 @@
+[
+    {
+        "ParameterKey": "Project",
+        "ParameterValue": "memes-generator2-cicd2"
+    },
+    {
+        "ParameterKey": "Component",
+        "ParameterValue": "cicd"
+    },
+    {
+        "ParameterKey": "SharedStage",
+        "ParameterValue": "shared-dev"
+    },
+    {
+        "ParameterKey": "ArtifactBucket",
+        "ParameterValue": "/memes-generator2-cicd2/shared-dev/cicd/artifact-bucket/name"
+    },
+    {
+        "ParameterKey": "BuildSpecFile",
+        "ParameterValue": "test.buildspec.yaml"
+    },
+    {
+        "ParameterKey": "CodeBuildRoleName",
+        "ParameterValue": "/memes-generator2-cicd2/shared-dev/cicd/codebuild-role/name"
+    },
+    {
+        "ParameterKey": "S3Key",
+        "ParameterValue": "codebuild-artifacts"
+    },
+    {
+        "ParameterKey": "ProjectFunction",
+        "ParameterValue": "test-and-create-config"
+    },
+    {
+        "ParameterKey": "TargetStage",
+        "ParameterValue": "dev"
+    }
+]
