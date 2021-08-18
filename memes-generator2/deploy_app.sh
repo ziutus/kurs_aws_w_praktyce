@@ -2,31 +2,31 @@
 set -u
 set -e 
 
-# PROJECT="memes-generator2"
-# STAGE="dev"
-action=""
-STEP=12
+PROJECT="memes-generator2"
+STAGE="dev"
+action="create_paid"
+# STEP=12
 
 while [ $# -gt 0 ]; do
     case $1 in
         # -h|--help) shift; usage;;
         -s|--stage) shift; STAGE=$1; shift;;
         -p|--project) shift; PROJECT_NAME=$1; shift;;
-        --delete) shift; action='delete_paid';;
-        --create) shift; action='create_paid';;
+        --delete-paid) shift; action='delete_paid';;
+        --create-paid) shift; action='create_paid';;
         --step) shift; STEP=$1;;  
         *) echo "Wrong option $1"; exit 1;
     esac
 done;
 
 if [ -z $PROJECT ]; then
-    1>&2 echo "please setup env. variable PROJECT or use option --project PROJECT_NAME "
+    1>&2 echo "please setup env. variable PROJECT (export PROJECT='xxx') or use option --project PROJECT_NAME "
     1>&2 echo "exiting..."
     exit 2
 fi
 
 if [ -z $STAGE ]; then
-    1>&2 echo "please setup env. variable STAGE or use option --stage STAGE "
+    1>&2 echo "please setup env. variable STAGE (export STAGE='xxx')  or use option --stage STAGE "
     1>&2 echo "exiting..."
     exit 2
 fi
