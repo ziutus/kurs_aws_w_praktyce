@@ -4,7 +4,7 @@ set -u
 
 PROJECT_NAME=""
 COMPONENT_NAME=""
-STACK_NAME=""
+TEMPLATE_NAME=""
 STAGE=""
 SHARED_STAGE=""
 PARAMS=""
@@ -19,7 +19,7 @@ usage: $0
         -h|--help
         -s|--stage STAGE_NAME
         -shared-stage STAGE_NAME
-        -S|--stack STACK_NAME
+        -S|--template TEMPLATE_NAME
         -p|--project PROJECT_NAME
         -c|--component COMPONENT_NAME
         -P|--params PARAMS_NAME
@@ -42,7 +42,7 @@ while [ $# -gt 0 ]; do
         -c|--component) shift; COMPONENT_NAME=$1; shift;;
         -s|--stage) shift; STAGE=$1; SHARED_STAGE=""; shift;;
         --shared-stage) shift; STAGE=""; SHARED_STAGE=$1; shift;;
-        -S|--stack) shift; STACK_NAME=$1; shift;;
+        -S|--template) shift; TEMPLATE_NAME=$1; shift;;
         -P|--params) shift; PARAMS=$1; shift;;
 
         *) echo "Wrong option $1"; exit 1;
@@ -61,7 +61,7 @@ fi
 
 mkdir -p $PROJECT_NAME/$COMPONENT_NAME/{commands,parameters,templates}
 
-if [ -z $STACK_NAME ]; then 
+if [ -z $TEMPLATE_NAME ]; then 
   exit 0
 fi
 
@@ -115,8 +115,8 @@ else
 fi
 
 echo "Creating files "
-PARAM_FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/${STACK_NAME}${PARAM_FILE_NAME_PART}.json"
-TEMPLATE_FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/templates/${STACK_NAME}.yaml"
+PARAM_FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/parameters/${TEMPLATE_NAME}${PARAM_FILE_NAME_PART}.json"
+TEMPLATE_FILE_NAME="$PROJECT_NAME/$COMPONENT_NAME/templates/${TEMPLATE_NAME}.yaml"
 
 if [ ! -f $TEMPLATE_FILE_NAME ]; then 
     echo "Creating tempalte file: >$TEMPLATE_FILE_NAME<"
