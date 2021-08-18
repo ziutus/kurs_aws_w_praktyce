@@ -3,7 +3,7 @@ export PROJECT="memes-generator2-cicd2"
 export SHARED_STAGE="shared-dev"
 export STAGE=""
 
-STEP=8
+STEP=11
 
 [[ $STEP -le 1 ]] && ./deploy.sh --component cicd --template-name account-parameters --exec
 [[ $STEP -le 2 ]] && ./deploy.sh --component cicd --template-name git-repository --params cicd --exec
@@ -18,6 +18,8 @@ STEP=8
 #  creating code build projects to run shell scripts
 # [[ $STEP -le 10 ]] && ./deploy.sh --component cicd --template-name build-project --params create-db-user --exec
 # [[ $STEP -le 11 ]] && ./deploy.sh --component cicd --template-name build-project --params test-and-create-config --exec
+[[ $STEP -le 11 ]] && ./deploy.sh --component cicd --template-name build-project --params upload-files --exec
+
 
 
 exit 0
