@@ -1,0 +1,164 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Pipeline creation stack
+
+Parameters:
+  Project:
+    Description: Project name
+    Type: String
+    AllowedPattern: ^[a-z][a-zA-Z0-9-]{3,25}$
+  # Component:
+  #   Description: Name of the component
+  #   Type: String
+  #   AllowedPattern: ^[a-z][a-zA-Z0-9-]{2,15}$
+  # SharedStage:
+  #   Description: Stage name for shared resources
+  #   Type: String
+  #   AllowedValues:
+  #     - shared-dev
+  #     - shared-test
+  #     - shared
+
+
+# SSM parameters
+  CodePipelineRoleName:    
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Code Pipeline Role
+
+  ArtifactBucket:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Artifact Bucket 
+
+  KmsKeyArn:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: KMS Key 
+
+  RepositoryName:
+    Type: AWS::SSM::Parameter::Value<String>
+
+  TargetAccountId:
+    Description: ID of the Target AWS Account
+    Type: AWS::SSM::Parameter::Value<String>
+
+  DeploymentRoleName:
+    Description: A role name for CI/CD in the target account
+    Type: AWS::SSM::Parameter::Value<String>
+
+  ServiceRoleName:
+    Description: A role name for CI/CD in the target account
+    Type: AWS::SSM::Parameter::Value<String>
+
+# Tamplate strings
+  BranchName:
+    Type: String
+
+  TargetStage:
+    Type: String
+
+  TestAndBuildProject:
+    Type: String
+
+  DeploymentRegion:
+    Description: Region for deployments
+    Type: String
+    AllowedValues:
+      - eu-central-1
+      - eu-west-1
+    Default: eu-central-1
+
+  CrossRegionDeployment:
+    Description: Is the deployment in the same or another region than the pipeline?
+    Type: String
+    AllowedValues:
+      - 'yes'
+      - 'no'
+    Default: 'no'
+
+
+Conditions:
+  IsCrossRegionDeployment: !Equals [ !Ref CrossRegionDeployment, 'yes']
+
+
+Resources:
+  codepipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Ref AWS::StackName
+      RoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/${CodePipelineRoleName}
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactBucket
+        EncryptionKey:
+          Id: !Ref KmsKeyArn
+          Type: KMS
+
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: TemplateSource
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeCommit
+                Version: "1"
+              Configuration:
+                BranchName: !Ref BranchName
+                PollForSourceChanges: false
+                RepositoryName: !Ref RepositoryName
+              OutputArtifacts:
+                - Name: !Sub SourceArtifacts-${Project}-${TargetStage}
+        - Name: BuildArtifacts
+          Actions:
+            - Name: TestAndBuildArtifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName: !Ref TestAndBuildProject
+              InputArtifacts:
+                - Name: !Sub SourceArtifacts-${Project}-${TargetStage}
+              OutputArtifacts:
+                - Name: !Sub Artifacts-${Project}-${TargetStage}
+        - Name: DeployLoggingResources
+          Actions:
+            - Name: LoggingResources-CreateChangeSet
+              RunOrder: 10
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: "1"
+              InputArtifacts:
+                - Name: !Sub Artifacts-${Project}-${TargetStage}
+              Configuration:
+                ActionMode: CHANGE_SET_REPLACE
+                RoleArn: !Sub arn:aws:iam::${TargetAccountId}:role/${DeploymentRoleName}
+                StackName: !Sub ${Project}-operations-log-bucket-${TargetStage}
+                ChangeSetName: !Sub ${Project}-operations-log-bucket-${TargetStage}-change-set
+                TemplatePath: !Sub Artifacts-${Project}-${TargetStage}::${Project}/operations/templates/log-bucket-packaged.yaml
+                TemplateConfiguration: !Sub Artifacts-${Project}-${TargetStage}::${Project}/operations/config-files/log-bucket-${TargetStage}.json
+              RoleArn: !Sub arn:aws:iam::${TargetAccountId}:role/${ServiceRoleName}
+              Region: !If
+                - IsCrossRegionDeployment
+                - !Ref DeploymentRegion
+                - !Ref AWS::Region
+            - Name: LoggingResources-ExecuteChangeSet
+              RunOrder: 12
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: "1"
+              InputArtifacts:
+                - Name: !Sub Artifacts-${Project}-${TargetStage}
+              Configuration:
+                ActionMode: CHANGE_SET_EXECUTE
+                RoleArn: !Sub arn:aws:iam::${TargetAccountId}:role/${DeploymentRoleName}
+                StackName: !Sub ${Project}-operations-log-bucket-${TargetStage}
+                ChangeSetName: !Sub ${Project}-operations-log-bucket-${TargetStage}-change-set
+              RoleArn: !Sub arn:aws:iam::${TargetAccountId}:role/${ServiceRoleName}
+              Region: !If
+                - IsCrossRegionDeployment
+                - !Ref DeploymentRegion
+                - !Ref AWS::Region
