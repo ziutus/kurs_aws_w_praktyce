@@ -66,6 +66,9 @@ Parameters:
 
 Conditions:
   IsCrossRegionDeployment: !Equals [ !Ref CrossRegionDeployment, 'yes']
+  IsDevOrTest: !Or
+    - !Equals [ !Ref TargetStage, 'dev' ]
+    - !Equals [ !Ref TargetStage, 'test' ]
 
 Resources:
   Pipeline:
@@ -113,7 +116,14 @@ Resources:
                 - IsCrossRegionDeployment
                 - !Ref DeploymentRegion
                 - !Ref AWS::Region
+      RestartExecutionOnUpdate: !If
+        - IsDevOrTest
+        - true
+        - false
 
+      Tags:
+        - Key: Name
+          Value: !Sub ${Project}-${SharedStage}-${Component}-delete-pipeline
 
 
   PipelineArnParam:
