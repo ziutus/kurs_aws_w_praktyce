@@ -120,6 +120,16 @@ done;
 #TODO: Check if region has correct name if got from command line
 #TODO: Add check if s3 bucket for templates exist
 #TODO: Add task to create s3 bucket if needed
+echo -n "DEBUG:Start time: "
+date +"%Y/%m/%d %H:%m:%S"
+
+echo "Initial values for script (commnad line or env setup)"
+echo "->Project: $PROJECT_NAME"
+echo "->STAGE  / Shared STAGE: $STAGE / $SHARED_STAGE "
+echo "->Component: $COMPONENT_NAME"
+echo "->template: $TEMPLATE_NAME"
+echo "->PARAMS: $PARAMS"
+echo ""
 
 if  [ -z $PROJECT_NAME ]; then
     echo "guessing project name from path"
@@ -141,7 +151,7 @@ if  [ -z $PROJECT_NAME ]; then
     echo " -- project name: $PROJECT_NAME"
     echo " -- compomnent name: $COMPONENT_NAME"
 else 
-    echo " setup project path and component path from command line options"
+    echo "Setup project path and component path from command line options"
     PROJECT_PATH="./$PROJECT_NAME"
     echo -n " -- project path: $PROJECT_PATH"
     if [ ! -d $PROJECT_PATH ]; then
@@ -369,6 +379,9 @@ else
     echo "aws cloudformation delete-stack --stack $STACK_NAME"    
 fi
 
+echo ""
+echo -n "DEBUG: End time: "
+date +"%Y/%m/%d %H:%m:%S"
 
 
 exit 0
