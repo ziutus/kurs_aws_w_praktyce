@@ -60,6 +60,17 @@ Resources:
       VPCSecurityGroups:
         - !Ref DatabaseSecurityGroup
 
+  DbInstanceParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Description: !Sub Stores ${Project}-${Stage}-${Component} App CredentialsArn
+      Tier: Standard
+      Name: !Sub /${Project}/${Stage}/${Component}/database/instance
+      Value: !Ref DbInstance
+      Tags:
+        Name: !Sub ${Project}-${Stage}-${Component}-database-instance
+
   DbCredentials:
     Type: AWS::SecretsManager::Secret
     Properties:
@@ -115,4 +126,7 @@ Resources:
 
 # Conditions: 
 
-# Outputs:
+Outputs:
+  Database:
+   Description: Database
+   Value: !Ref DbInstance
